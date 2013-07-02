@@ -175,7 +175,7 @@ class OAuthRemoteApp(object):
     def __init__(self, oauth, name, base_url,
                  request_token_url,
                  access_token_url, authorize_url,
-                 consumer_key, consumer_secret,
+                 consumer_key=None, consumer_secret=None,
                  request_token_params=None,
                  access_token_params=None,
                  access_token_method='GET'):
@@ -192,9 +192,16 @@ class OAuthRemoteApp(object):
         self.request_token_params = request_token_params or {}
         self.access_token_params = access_token_params or {}
         self.access_token_method = access_token_method
-        self._consumer = oauth2.Consumer(self.consumer_key,
-                                         self.consumer_secret)
-        self._client = OAuthClient(self._consumer)
+        self.config()
+
+    def config(self, **kwargs):
+        self.__dict__.update(kwargs)
+        if self.consumer_key and self.consumer_secret:
+            self._consumer = oauth2.Consumer(self.consumer_key,
+                                             self.consumer_secret)
+            self._client = OAuthClient(self._consumer)
+        else:
+            self._consumer = self._client = None
 
     def status_okay(self, resp):
         """Given request data, checks if the status is okay."""
